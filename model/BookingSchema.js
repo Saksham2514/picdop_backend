@@ -39,7 +39,8 @@ const BookingSchema = new mongoose.Schema({
   },
   parcelPaymentCollection: {
     type: String,
-    required: true,
+    // required: true,
+    default:"1000"
   },
   status: {
     type: String,
@@ -71,6 +72,12 @@ const BookingSchema = new mongoose.Schema({
   agentId: {
     type: String,
   },
+  pickupDate:{
+    type:Date
+  },
+  deliveryDate:{
+    type:Date
+  }
 });
 
 module.exports = mongoose.model("Booking", BookingSchema);

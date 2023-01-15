@@ -1,5 +1,10 @@
 const Booking = require("../model/BookingSchema");
 
+const multer = require("multer");
+const path = require("path");
+const storage = multer.memoryStorage()
+const upload = multer({storage:storage,dest:"uploads/"})
+
 const createOrder = (req, res) => {
   Booking.create(
     {
@@ -61,7 +66,13 @@ const findOrder = (req, res) => {
 const getOrderByUser = (req, res) => {
   // console.log(`{createdBy:${req.params.userID}}`)
 
-  Booking.find({ $or:[{from:req.params.userID},{to:req.params.userID},{createdBy:req.params.userID}]})
+  Booking.find({
+    $or: [
+      { from: req.params.userID },
+      { to: req.params.userID },
+      { createdBy: req.params.userID },
+    ],
+  })
     .sort({ createdAt: -1 })
     .exec((err, BookingSchema) => {
       if (err) {
@@ -93,6 +104,8 @@ const updateOrder = (req, res) => {
         status: req.body.status,
         agentName: req.body.agentName,
         agentId: req.body.agentId,
+        pickupDate: req.body.pickupDate,
+        deliveryDate: req.body.deliveryDate
       },
     },
     { new: true, setDefaultsOnInsert: true },
@@ -110,6 +123,50 @@ const deleteOrder = (req, res) => {
     .catch((err) => res.send(err));
 };
 
+const multiple = multer({
+  storage: storage,
+  dest:"uploads/",
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype == "image/png" ||
+      file.mimetype == "image/jpg" ||
+      file.mimetype == "image/jpeg"
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+      return cb(new Error("Only .png, .jpg and .jpeg format allowed!"));
+    }
+  },
+}).single("multiple");
+
+const imgUpload = (req,res) => {
+  console.log(req);
+  multiple(req, res, (err) => {
+    // console.log("Request for img upload recieved");
+    if (req.body.files) {
+      console.log(req.body.files)
+    }
+    if (req.files) {
+      req.files.forEach((file) => {
+        if (err instanceof multer.MulterError) {
+          console.log(err);
+          res.send(err);
+        } else if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          console.log(file.path);
+          res.send(file.path);
+        }
+      });
+    }else{
+      console.log("No file recieved");
+      res.send("Files not send")
+    }
+  });
+};
+
 module.exports = {
   getOrder,
   getAnOrder,
@@ -118,4 +175,5 @@ module.exports = {
   createOrder,
   updateOrder,
   deleteOrder,
+  imgUpload
 };

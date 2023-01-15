@@ -12,7 +12,7 @@ app.use(cors())
 const router = require("./router");
 
 
-const PORT = 5555;
+const PORT = 5000;
 app.use(router);
 mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,
