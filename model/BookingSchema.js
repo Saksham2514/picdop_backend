@@ -31,7 +31,7 @@ const BookingSchema = new mongoose.Schema({
   },
   parcelDescription: {
     type: String,
-    required: true,
+
   },
   paymentMode: {
     type: String,

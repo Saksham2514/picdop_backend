@@ -5,8 +5,12 @@ const CategorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  limit: {
-    type: String,
+  lowerLimit: {
+    type: Number,
+    required: true,
+  },
+  upperLimit: {
+    type: Number,
     required: true,
   },
   localPrice: {
@@ -24,4 +28,4 @@ const CategorySchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Booking", CategorySchema);
+module.exports = mongoose.model("Category", CategorySchema);
