@@ -6,16 +6,18 @@ require("dotenv").config();
 
 
 const app = express();
-app.use(express.json());
+app.use(express.json({limit:"100MB"}));
 app.use(express.urlencoded({extended:true}));
 app.use(cors())
-app.use(express.static(path.resolve('./uploads')))
 
 const router = require("./router");
 
 
 const PORT = 5000;
 app.use(router);
+
+
+
 mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

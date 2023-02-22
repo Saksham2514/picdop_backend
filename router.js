@@ -5,15 +5,15 @@ const fileSystem = require("fs");
 
 let uploadedFileName = [];
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: function (req, file, cb) {
-    const uploadedName = Date.now() + file.originalname;
-    uploadedFileName.push(uploadedName);
-    cb(null, uploadedName);
-  },
-});
-const upload = multer({ storage });
+// const storage = multer.diskStorage({
+//   destination: "uploads/",
+//   filename: function (req, file, cb) {
+//     const uploadedName = Date.now() + file.originalname;
+//     uploadedFileName.push(uploadedName);
+//     cb(null, uploadedName);
+//   },
+// });
+// const upload = multer({ storage });
 
 const {
   getUsers,
@@ -87,21 +87,21 @@ router.delete("/prices/:userID", deleteCategories);
 
 //Image Upload
 
-router.post(
-  "/test",
-  upload.fields([
-    { name: "shopImages", maxCount: 5 },
-    { name: "billImages", maxCount: 5 },
-    { name: "parcelImages", maxCount: 5 },
-  ]),
-  function (req, res) {
-    if (uploadedFileName.length === 0)
-      res.json({ stat: "error", message: "something went wrong" });
-    else {
-      res.json({ stat: "success", message: uploadedFileName });
-      uploadedFileName = [];
-    }
-  }
-);
+// router.post(
+//   "/test",
+//   upload.fields([
+//     { name: "shopImages", maxCount: 5 },
+//     { name: "billImages", maxCount: 5 },
+//     { name: "parcelImages", maxCount: 5 },
+//   ]),
+//   function (req, res) {
+//     if (uploadedFileName.length === 0)
+//       res.json({ stat: "error", message: "something went wrong" });
+//     else {
+//       res.json({ stat: "success", message: uploadedFileName });
+//       uploadedFileName = [];
+//     }
+//   }
+// );
 
 module.exports = router;
