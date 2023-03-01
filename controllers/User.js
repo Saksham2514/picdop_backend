@@ -96,6 +96,7 @@ const updateUser = (req, res) => {
         subCategory: req.body.subCategory,
         shopName: req.body.shopName,
         shopNumber: req.body.shopNumber,
+        shopImages: req.body.shopImages,
         cardNumber: req.body.cardNumber,
         cardHolder: req.body.cardHolder,
         cardExpiry: req.body.cardExpiry,
