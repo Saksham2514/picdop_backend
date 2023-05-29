@@ -59,6 +59,27 @@ const findOrder = (req, res) => {
       res.json(BookingSchema);
     });
 };
+const getTotalIncome = (req, res) => {
+  red = function(k, v) {
+    var i, sum = 0;
+    for (i in v) {
+      sum += v[i];
+    }
+    return sum;
+  }
+  map = function() { emit("parcelPymentCollection", this.parcelPaymentCollection); }
+
+  res = Booking.mapReduce(map,red);
+console.log(res);
+  // Booking.find(req.body)
+  //   .sort({ createdAt: -1 })
+  //   .exec((err, BookingSchema) => {
+  //     if (err) {
+  //       res.send(err);
+  //     }
+  //     res.json(BookingSchema);
+  //   });
+};
 const getOrderByUser = (req, res) => {
   // console.log(`{createdBy:${req.params.userID}}`)
 
@@ -128,5 +149,5 @@ module.exports = {
   createOrder,
   updateOrder,
   deleteOrder,
-  
+getTotalIncome  
 };

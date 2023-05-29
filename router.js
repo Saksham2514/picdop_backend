@@ -33,6 +33,7 @@ const {
   updateOrder,
   deleteOrder,
   imgUpload,
+  getTotalIncome,
 } = require("./controllers/Booking");
 
 const {
@@ -68,6 +69,7 @@ router.get("/order/:userID", getOrderByUser);
 router.post("/orders/search", findOrder);
 
 router.post("/orders", createOrder);
+router.post("/income", getTotalIncome);
 
 router.put("/orders/:orderID", updateOrder);
 
