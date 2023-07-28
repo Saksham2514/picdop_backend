@@ -10,9 +10,9 @@ app.use(express.urlencoded({ extended: true }));
 
 
 const corsOptions ={
-  origin:'https://picdop-blush.vercel.app/', 
+  origin:'https://picdop-blush.vercel.app', 
   credentials:true,            //access-control-allow-credentials:true
-  optionSuccessStatus:200,
+  optionsSuccessStatus:200,
   methods: [
     'GET',
     'POST',
