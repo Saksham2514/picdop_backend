@@ -16,6 +16,7 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.options('*',cors())
 const router = require("./router");
 
 const PORT = process.env.PORT || 5000;
