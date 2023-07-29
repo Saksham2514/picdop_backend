@@ -25,11 +25,11 @@ const corsOptions ={
 
 }
 app.use(cors(corsOptions));
-app.options('*',cors())
+app.options('*',cors(corsOptions))
 
 const router = require("./router");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5400;
 app.use(router);
 
 mongoose
