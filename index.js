@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 const corsOptions ={
-  origin:'https://picdop-blush.vercel.app', 
+  origin:['https://picdop-blush.vercel.app','http://192.168.1.8:3000'], 
   credentials:true,            //access-control-allow-credentials:true
   optionsSuccessStatus:200,
   methods: [
