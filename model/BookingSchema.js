@@ -38,9 +38,9 @@ const BookingSchema = new mongoose.Schema({
     required: true,
   },
   parcelPaymentCollection: {
-    type: String,
+    type: Number,
     // required: true,
-    default:"1000"
+    default:70
   },
   status: {
     type: String,

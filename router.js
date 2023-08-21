@@ -22,6 +22,10 @@ const {
   createUser,
   updateUser,
   deleteUser,
+  adminEarnings,
+  vendorEarnings,
+  agentEarnings,
+  statusAnalysis,
 } = require("./controllers/User");
 
 const {
@@ -44,6 +48,7 @@ const {
   deleteCategories,
   calculatePrice,
 } = require("./controllers/Category");
+const { createTransaction, getTransactions, findTransactions } = require("./controllers/Transaction");
 
 router.get("/", (req, res) => {
   res.send("Working");
@@ -105,5 +110,17 @@ router.delete("/prices/:userID", deleteCategories);
 //     }
 //   }
 // );
+
+//ADMIN ANALYSIS 
+
+router.post('/admin/earnings',adminEarnings)
+router.post('/admin/earnings/status',statusAnalysis)
+
+
+// Transaction
+router.post('/admin/transaction/new',createTransaction)
+router.post('/admin/transaction/all',getTransactions)
+router.post('/admin/transaction/one',findTransactions)
+
 
 module.exports = router;
