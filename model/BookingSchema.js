@@ -65,7 +65,6 @@ const BookingSchema = new mongoose.Schema({
   otp: {
     type: Number,
   },
-
   agentName: {
     type: String,
   },

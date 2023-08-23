@@ -1,5 +1,6 @@
 const BookingSchema = require("../model/BookingSchema");
 const User = require("../model/Users");
+const jwt = require("jsonwebtoken");
 
 const createUser = (req, res) => {
   User.updateOne(
@@ -89,7 +90,15 @@ const findUsers = (req, res) => {
       if (err) {
         res.send(err);
       }
-      res.json(users);
+      const token = jwt.sign(
+        { userObj: users[0].role },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "1d",
+        }
+      );
+      console.log(users);
+      res.json([...users, token]);
     });
 };
 
@@ -129,6 +138,38 @@ const updateUser = (req, res) => {
       "-cardExpiry",
       "-password",
     ])
+    .exec((err, User) => {
+      if (err) {
+        res.send(err);
+      } else res.json(User);
+    });
+};
+
+const addToWallet = (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.body.userID },
+    {
+      $inc: { wallet: parseInt(req.body.amount) },
+    },
+    { new: true, setDefaultsOnInsert: true }
+  )
+    .select(["wallet"])
+    .exec((err, User) => {
+      if (err) {
+        res.send(err);
+      } else res.json(User);
+    });
+};
+
+const deductWallet = (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.body.userID },
+    {
+      $inc: { wallet: -req.body.amount },
+    },
+    { new: true, setDefaultsOnInsert: true }
+  )
+    .select(["wallet"])
     .exec((err, User) => {
       if (err) {
         res.send(err);
@@ -200,8 +241,8 @@ const adminEarnings = async (req, res) => {
             createdBy: "$createdBy", // Group by the 'createdBy' field
           },
           totalAmount: { $sum: "$parcelPaymentCollection" }, // Sum the 'totalAmount' field
-          status: {$push:"$status"},
-          createdAt: {$push:"$createdAt"},
+          status: { $push: "$status" },
+          createdAt: { $push: "$createdAt" },
         },
       },
       {
@@ -219,10 +260,10 @@ const adminEarnings = async (req, res) => {
           user: "$_id.createdBy",
           totalAmount: 1,
           parcelPaymentCollection: 1,
-          createdAt:"$createdAt"
+          createdAt: "$createdAt",
         },
       },
-    ]); 
+    ]);
 
     let fil = {};
     if (req?.body?.id) {
@@ -337,4 +378,6 @@ module.exports = {
   deleteUser,
   adminEarnings,
   statusAnalysis,
+  addToWallet,
+  deductWallet,
 };

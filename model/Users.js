@@ -66,7 +66,6 @@ const UserSchema = new mongoose.Schema({
   shopImages: {
     type: [String],
   },
-
   cardNumber: {
     type: String,
   },
@@ -81,10 +80,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     maxLength: 3,
   },
-
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  wallet: {
+    type: Number,
+    default: 0,
   },
 });
 
@@ -95,11 +97,7 @@ UserSchema.pre("deleteOne", function (next) {
   console.log("Entered Pre Remove with : " + id);
   mongoose
     .model("Booking")
-    .deleteMany({ "$or": [ 
-      { "from":id},
-      { "to":id} ,
-      {"createdBy":id}
-      ] } )
+    .deleteMany({ $or: [{ from: id }, { to: id }, { createdBy: id }] })
     .then((res) => {
       console.log(res);
       next();

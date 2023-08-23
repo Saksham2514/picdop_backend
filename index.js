@@ -8,24 +8,15 @@ const app = express();
 app.use(express.json({ limit: "100MB" }));
 app.use(express.urlencoded({ extended: true }));
 
-
-const corsOptions ={
-  origin:['https://picdop-blush.vercel.app','http://localhost:3000'], 
-  credentials:true,            //access-control-allow-credentials:true
-  optionsSuccessStatus:200,
-  methods: [
-    'GET',
-    'POST',
-    'PUT',
-    'DELETE',
-  ],
-  allowedHeaders: [
-    'Content-Type',
-  ],
- 
-}
+const corsOptions = {
+  origin: ["https://picdop-blush.vercel.app", "http://localhost:3000"],
+  credentials: true, //access-control-allow-credentials:true
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 app.use(cors(corsOptions));
-app.options('*',cors(corsOptions))
+app.options("*", cors(corsOptions));
 
 const router = require("./router");
 
@@ -44,7 +35,6 @@ mongoose
     console.log(err);
   });
 
-
-app.listen(PORT,'0.0.0.0', async () => {
+app.listen(PORT, "0.0.0.0", async () => {
   console.log(`server up on port ${PORT}`);
 });

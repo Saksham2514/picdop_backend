@@ -2,7 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
 const fileSystem = require("fs");
-
+const auth = require("./middlewares/Auth");
 let uploadedFileName = [];
 
 // const storage = multer.diskStorage({
@@ -17,7 +17,6 @@ let uploadedFileName = [];
 
 const {
   getUsers,
-
   findUsers,
   createUser,
   updateUser,
@@ -26,6 +25,8 @@ const {
   vendorEarnings,
   agentEarnings,
   statusAnalysis,
+  addToWallet,
+  deductWallet,
 } = require("./controllers/User");
 
 const {
@@ -41,6 +42,13 @@ const {
 } = require("./controllers/Booking");
 
 const {
+  createNote,
+  getNotes,
+  getANote,
+  deleteNote,
+} = require("./controllers/Note");
+
+const {
   getCategories,
   searchCategories,
   createCategory,
@@ -48,7 +56,11 @@ const {
   deleteCategories,
   calculatePrice,
 } = require("./controllers/Category");
-const { createTransaction, getTransactions, findTransactions } = require("./controllers/Transaction");
+const {
+  createTransaction,
+  getTransactions,
+  findTransactions,
+} = require("./controllers/Transaction");
 
 router.get("/", (req, res) => {
   res.send("Working");
@@ -92,7 +104,20 @@ router.put("/prices/:userID", updateCategories);
 
 router.delete("/prices/:userID", deleteCategories);
 
+// Note
+router.post("/getNotes", getNotes);
+
+router.post("/getNote", getANote);
+
+router.post("/createNote", createNote);
+
+router.delete("/deleteNote/:noteId", deleteNote);
 //Image Upload
+
+// Wallet
+router.post("/addToWallet", addToWallet);
+
+router.post("/deductWallet", deductWallet);
 
 // router.post(
 //   "/test",
@@ -111,16 +136,14 @@ router.delete("/prices/:userID", deleteCategories);
 //   }
 // );
 
-//ADMIN ANALYSIS 
+//ADMIN ANALYSIS
 
-router.post('/admin/earnings',adminEarnings)
-router.post('/admin/earnings/status',statusAnalysis)
-
+router.post("/admin/earnings", adminEarnings);
+router.post("/admin/earnings/status", statusAnalysis);
 
 // Transaction
-router.post('/admin/transaction/new',createTransaction)
-router.post('/admin/transaction/all',getTransactions)
-router.post('/admin/transaction/one',findTransactions)
-
+router.post("/admin/transaction/new", createTransaction);
+router.post("/admin/transaction/all", getTransactions);
+router.post("/admin/transaction/one", findTransactions);
 
 module.exports = router;
