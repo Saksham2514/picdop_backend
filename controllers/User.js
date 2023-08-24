@@ -97,7 +97,7 @@ const findUsers = (req, res) => {
           expiresIn: "1d",
         }
       );
-      console.log(users);
+
       res.json([...users, token]);
     });
 };

@@ -1,9 +1,28 @@
 const Booking = require("../model/BookingSchema");
-
-
+const User = require("../model/Users");
 
 const createOrder = (req, res) => {
+  req.body.role == "admin"
+    ? createBooking(req, res)
+    : User.findOneAndUpdate(
+        { _id: req.body.userID },
+        {
+          $inc: { wallet: -parseInt(req.body.parcelPaymentCollection) },
+        },
+        { new: true, setDefaultsOnInsert: true }
+      )
+        .select(["wallet"])
+        .exec((err, User) => {
+          if (err) {
+            res.send(err);
+          } else {
+            createBooking(req, res);
+            console.log(User);
+          }
+        });
+};
 
+const createBooking = (req, res) => {
   Booking.create(
     {
       from: req.body?.from,
@@ -30,7 +49,8 @@ const createOrder = (req, res) => {
 };
 
 const getOrder = (req, res) => {
-  Booking.find().sort({ createdAt: -1 })
+  Booking.find()
+    .sort({ createdAt: -1 })
     .exec((err, BookingSchema) => {
       if (err) {
         res.send(err);
@@ -60,17 +80,20 @@ const findOrder = (req, res) => {
     });
 };
 const getTotalIncome = (req, res) => {
-  red = function(k, v) {
-    var i, sum = 0;
+  red = function (k, v) {
+    var i,
+      sum = 0;
     for (i in v) {
       sum += v[i];
     }
     return sum;
-  }
-  map = function() { emit("parcelPymentCollection", this.parcelPaymentCollection); }
+  };
+  map = function () {
+    emit("parcelPymentCollection", this.parcelPaymentCollection);
+  };
 
-  res = Booking.mapReduce(map,red);
-console.log(res);
+  res = Booking.mapReduce(map, red);
+
   // Booking.find(req.body)
   //   .sort({ createdAt: -1 })
   //   .exec((err, BookingSchema) => {
@@ -113,7 +136,7 @@ const updateOrder = (req, res) => {
         parcelLength: req.body.parcelLength,
         parcelDescription: req.body.parcelDescription,
         paymentMode: req.body.paymentMode,
-        parcelPaymentCollection:req.body.parcelPaymentCollection,
+        parcelPaymentCollection: req.body.parcelPaymentCollection,
         parcelImages: req.body.parcelImages,
         billImages: req.body.billImages,
         createdBy: req.body.createdBy,
@@ -122,7 +145,7 @@ const updateOrder = (req, res) => {
         agentName: req.body.agentName,
         agentId: req.body.agentId,
         pickupDate: req.body.pickupDate,
-        deliveryDate: req.body.deliveryDate
+        deliveryDate: req.body.deliveryDate,
       },
     },
     { new: true, setDefaultsOnInsert: true },
@@ -140,7 +163,6 @@ const deleteOrder = (req, res) => {
     .catch((err) => res.send(err));
 };
 
-
 module.exports = {
   getOrder,
   getAnOrder,
@@ -149,5 +171,5 @@ module.exports = {
   createOrder,
   updateOrder,
   deleteOrder,
-getTotalIncome  
+  getTotalIncome,
 };
