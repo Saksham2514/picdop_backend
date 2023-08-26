@@ -1,5 +1,7 @@
+const { BSON } = require("bson");
 const Booking = require("../model/BookingSchema");
 const User = require("../model/Users");
+const { getComission } = require("./Comission");
 
 const createOrder = (req, res) => {
   req.body.role == "admin"
@@ -11,14 +13,12 @@ const createOrder = (req, res) => {
         },
         { new: true, setDefaultsOnInsert: true }
       )
-        .select(["wallet"])
-        .exec((err, User) => {
-          if (err) {
-            res.send(err);
-          } else {
-            createBooking(req, res);
-            console.log(User);
-          }
+        .then((usr) => {
+          createBooking(req, res);
+        })
+        .catch((err) => {
+          res.send(err);
+          console.log(err);
         });
 };
 
@@ -42,8 +42,9 @@ const createBooking = (req, res) => {
     },
     (err, Booking) => {
       if (err) {
+        console.log(err);
         res.send(err);
-      } else res.json(Booking);
+      } else res.json({ ...Booking });
     }
   );
 };
@@ -72,6 +73,17 @@ const getAnOrder = (req, res) => {
 const findOrder = (req, res) => {
   Booking.find(req.body)
     .sort({ createdAt: -1 })
+    .exec((err, BookingSchema) => {
+      if (err) {
+        res.send(err);
+      }
+      res.json(BookingSchema);
+    });
+};
+const findOrderLimit = (req, res) => {
+  Booking.find(req.body)
+    .sort({ createdAt: -1 })
+    .limit(5)
     .exec((err, BookingSchema) => {
       if (err) {
         res.send(err);
@@ -122,8 +134,8 @@ const getOrderByUser = (req, res) => {
     });
 };
 
-const updateOrder = (req, res) => {
-  Booking.findOneAndUpdate(
+const updateOrder = async (req, res) => {
+  const booking = await Booking.findOneAndUpdate(
     { _id: req.params.orderID },
     {
       $set: {
@@ -148,13 +160,31 @@ const updateOrder = (req, res) => {
         deliveryDate: req.body.deliveryDate,
       },
     },
-    { new: true, setDefaultsOnInsert: true },
-    (err, Booking) => {
-      if (err) {
-        res.send(err);
-      } else res.json(Booking);
-    }
+    { new: true, setDefaultsOnInsert: true }
   );
+  const populatedBooking = await User.find({
+    $or: [
+      { _id: new BSON.ObjectId(booking.from) },
+      { _id: new BSON.ObjectId(booking.to) },
+    ],
+  })
+    .select([
+      "city",
+      "line1",
+      "line2",
+      "pin",
+      "showpName",
+      "showpNumber",
+      "state",
+    ])
+    .then((data) => {
+      booking.from = `${data[0].line1}, ${data[0].line2}, ${data[0].city}, ${data[0].pin}, ${data[0].city}, ${data[0].state}`;
+      booking.to = `${data[1].line1}, ${data[1].line2}, ${data[1].city}, ${data[1].pin}, ${data[1].city}, ${data[1].state}`;
+      getComission(booking, res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const deleteOrder = (req, res) => {
@@ -168,6 +198,7 @@ module.exports = {
   getAnOrder,
   getOrderByUser,
   findOrder,
+  findOrderLimit,
   createOrder,
   updateOrder,
   deleteOrder,

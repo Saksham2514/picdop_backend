@@ -34,6 +34,7 @@ const {
   getAnOrder,
   getOrderByUser,
   findOrder,
+  findOrderLimit,
   createOrder,
   updateOrder,
   deleteOrder,
@@ -62,6 +63,8 @@ const {
   findTransactions,
 } = require("./controllers/Transaction");
 
+const { updateComission, getComission } = require("./controllers/Comission");
+
 router.get("/", (req, res) => {
   res.send("Working");
 });
@@ -84,6 +87,7 @@ router.get("/orders", getOrder);
 router.get("/order/:userID", getOrderByUser);
 
 router.post("/orders/search", findOrder);
+router.post("/orders/searchLimit", findOrderLimit);
 
 router.post("/orders", createOrder);
 router.post("/income", getTotalIncome);
@@ -119,6 +123,9 @@ router.post("/addToWallet", addToWallet);
 
 router.post("/deductWallet", deductWallet);
 
+// Commision
+router.post("/updateComission", updateComission);
+router.post("/getComission", getComission);
 // router.post(
 //   "/test",
 //   upload.fields([
