@@ -57,13 +57,19 @@ const {
   deleteCategories,
   calculatePrice,
 } = require("./controllers/Category");
-const {
-  createTransaction,
-  getTransactions,
-  findTransactions,
-} = require("./controllers/Transaction");
+// const {
+//   createTransaction,
+//   getTransactions,
+//   findTransactions,
+// } = require("./controllers/Transaction1");
 
-const { updateComission, getComission } = require("./controllers/Comission");
+const { getSummary } = require("./controllers/Transaction");
+
+const {
+  updateComission,
+  getComission,
+  getCommissionValues,
+} = require("./controllers/Comission");
 
 router.get("/", (req, res) => {
   res.send("Working");
@@ -124,8 +130,9 @@ router.post("/addToWallet", addToWallet);
 router.post("/deductWallet", deductWallet);
 
 // Commision
-router.post("/updateComission", updateComission);
+router.put("/updateComission", updateComission);
 router.post("/getComission", getComission);
+router.get("/getComissionValues", getCommissionValues);
 // router.post(
 //   "/test",
 //   upload.fields([
@@ -149,8 +156,10 @@ router.post("/admin/earnings", adminEarnings);
 router.post("/admin/earnings/status", statusAnalysis);
 
 // Transaction
-router.post("/admin/transaction/new", createTransaction);
-router.post("/admin/transaction/all", getTransactions);
-router.post("/admin/transaction/one", findTransactions);
+// router.post("/admin/transaction/new", createTransaction);
+// router.post("/admin/transaction/all", getTransactions);
+// router.post("/admin/transaction/one", findTransactions);
+
+router.post("/getSummary", getSummary);
 
 module.exports = router;

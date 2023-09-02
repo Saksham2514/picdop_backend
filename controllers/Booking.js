@@ -2,19 +2,22 @@ const { BSON } = require("bson");
 const Booking = require("../model/BookingSchema");
 const User = require("../model/Users");
 const { getComission } = require("./Comission");
+const { createTransaction } = require("./Transaction");
 
 const createOrder = (req, res) => {
+  console.log(req.body.role);
   req.body.role == "admin"
-    ? createBooking(req, res)
+    ? createBooking(req, res, 0)
     : User.findOneAndUpdate(
-        { _id: req.body.userID },
+        { _id: req.body.createdBy },
         {
           $inc: { wallet: -parseInt(req.body.parcelPaymentCollection) },
         },
         { new: true, setDefaultsOnInsert: true }
       )
         .then((usr) => {
-          createBooking(req, res);
+          createBooking(req, res, usr.wallet);
+          console.log(usr.wallet);
         })
         .catch((err) => {
           res.send(err);
@@ -22,7 +25,7 @@ const createOrder = (req, res) => {
         });
 };
 
-const createBooking = (req, res) => {
+const createBooking = (req, res, wallet) => {
   Booking.create(
     {
       from: req.body?.from,
@@ -38,13 +41,23 @@ const createBooking = (req, res) => {
       parcelImages: req.body?.parcelImages,
       billImages: req.body?.billImages,
       createdBy: req.body?.createdBy,
-      otp: Math.floor(Math.random() * 999999) + 100000,
+      otp: parseInt(
+        (Math.floor(Math.random() * 999999) + 100000).toString().substring(0, 6)
+      ),
     },
     (err, Booking) => {
       if (err) {
         console.log(err);
         res.send(err);
-      } else res.json({ ...Booking });
+      } else {
+        createTransaction(
+          Booking.createdBy,
+          Booking.parcelPaymentCollection,
+          "Booking",
+          req.body.role
+        );
+        res.json({ ...Booking, wallet: wallet });
+      }
     }
   );
 };
@@ -162,29 +175,33 @@ const updateOrder = async (req, res) => {
     },
     { new: true, setDefaultsOnInsert: true }
   );
-  const populatedBooking = await User.find({
-    $or: [
-      { _id: new BSON.ObjectId(booking.from) },
-      { _id: new BSON.ObjectId(booking.to) },
-    ],
-  })
-    .select([
-      "city",
-      "line1",
-      "line2",
-      "pin",
-      "showpName",
-      "showpNumber",
-      "state",
-    ])
-    .then((data) => {
-      booking.from = `${data[0].line1}, ${data[0].line2}, ${data[0].city}, ${data[0].pin}, ${data[0].city}, ${data[0].state}`;
-      booking.to = `${data[1].line1}, ${data[1].line2}, ${data[1].city}, ${data[1].pin}, ${data[1].city}, ${data[1].state}`;
-      getComission(booking, res);
+  if (req.body.status === "Completed") {
+    const populatedBooking = await User.find({
+      $or: [
+        { _id: new BSON.ObjectId(booking.from) },
+        { _id: new BSON.ObjectId(booking.to) },
+      ],
     })
-    .catch((err) => {
-      console.log(err);
-    });
+      .select([
+        "city",
+        "line1",
+        "line2",
+        "pin",
+        "showpName",
+        "showpNumber",
+        "state",
+      ])
+      .then((data) => {
+        booking.from = `${data[0].line1}, ${data[0].line2}, ${data[0].city}, ${data[0].pin}, ${data[0].city}, ${data[0].state}`;
+        booking.to = `${data[1].line1}, ${data[1].line2}, ${data[1].city}, ${data[1].pin}, ${data[1].city}, ${data[1].state}`;
+        getComission(booking, res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else {
+    res.send(booking);
+  }
 };
 
 const deleteOrder = (req, res) => {

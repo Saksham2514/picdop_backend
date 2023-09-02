@@ -3,6 +3,7 @@ const comissionId = "64e9d0c0852a738ad91ad2df";
 const { Client } = require("@googlemaps/google-maps-services-js");
 const { addToWallet } = require("./User");
 const User = require("../model/Users");
+const { createTransaction } = require("./Transaction");
 
 const client = new Client({});
 
@@ -10,11 +11,7 @@ const updateComission = (req, res) => {
   Comission.findOneAndUpdate(
     { _id: comissionId },
     {
-      $set: {
-        breakpoint: req.breakpoint,
-        belowBreakpoint: booking.belowBreakpoint,
-        aboveBreakpoint: booking.aboveBreakpoint,
-      },
+      $set: req.body,
     },
     { new: true, setDefaultsOnInsert: true }
   ).exec((err, updatedCom) => {
@@ -24,8 +21,18 @@ const updateComission = (req, res) => {
   });
 };
 
+const getCommissionValues = (req, res) => {
+  Comission.findOne({ _id: comissionId })
+    .then((commissions) => {
+      res.send(commissions);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
 const getComission = async (booking, res) => {
-  const distance = await client
+  client
     .distancematrix({
       params: {
         origins: [booking.from],
@@ -35,48 +42,54 @@ const getComission = async (booking, res) => {
     })
     .then((r) => {
       console.log(r.data.rows[0]);
-      return Math.round(r.data.rows[0].elements[0].distance.value / 1000);
+      const distance = Math.round(
+        r.data.rows[0].elements[0].distance.value / 1000
+      );
+      Comission.findOne({ _id: comissionId })
+        .then((r) => {
+          let commissionAmount = r.belowBreakpoint;
+          if (distance > r.breakpoint) {
+            let aboveBreakCom = (distance - r.breakpoint) * r.aboveBreakpoint;
+            commissionAmount = commissionAmount + aboveBreakCom;
+          }
+          User.findOneAndUpdate(
+            { _id: booking.agentId, role: "agent" },
+            {
+              $inc: { wallet: parseInt(commissionAmount) },
+            },
+            { new: true, setDefaultsOnInsert: true }
+          )
+            .select(["wallet"])
+            .exec((err, User) => {
+              if (err) {
+                res.status(404).send({ err: "User Wallet Error" });
+              } else {
+                if (User == null) {
+                  res
+                    .status(404)
+                    .send({ res: "This endpoint is only for Agent" });
+                }
+                createTransaction(
+                  User._id,
+                  commissionAmount,
+                  "commission",
+                  "agent"
+                )
+                  .then(() => {
+                    res.send(User);
+                  })
+                  .catch(() => {
+                    res.status(404).send(err);
+                  });
+              }
+            });
+        })
+        .catch((err) => {
+          res.status(404).send({ err: "Commission Error" });
+        });
     })
     .catch((err) => {
-      console.log(err);
-      //   return res.send(err);
-    });
-  console.log("working1");
-  console.log(distance);
-  const commissionAmount = await Comission.findOne({ _id: comissionId })
-    .then((r) => {
-      if (distance <= r.breakpoint) {
-        return distance * r.belowBreakpoint;
-      } else {
-        let belowBreakCom = r.breakpoint * r.belowBreakpoint;
-        let aboveBreakCom = (distance - r.breakpoint) * r.aboveBreakpoint;
-        return belowBreakCom + aboveBreakCom;
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      //   return res.send(err);
-    });
-  console.log("working2");
-  console.log(commissionAmount);
-  User.findOneAndUpdate(
-    { _id: booking.agentId, role: "agent" },
-    {
-      $inc: { wallet: parseInt(commissionAmount) },
-    },
-    { new: true, setDefaultsOnInsert: true }
-  )
-    .select(["wallet"])
-    .exec((err, User) => {
-      if (err) {
-        // res.send(err);
-        console.log(err);
-      } else {
-        if (User == null) {
-          res.send({ res: "This endpoint is only for Agent" });
-        }
-        res.send(User);
-      }
+      res.status(404).send({ err: "Invalid address Error" });
     });
 };
 
@@ -97,4 +110,4 @@ const getComission = async (booking, res) => {
 //   );
 // };
 
-module.exports = { updateComission, getComission };
+module.exports = { updateComission, getComission, getCommissionValues };

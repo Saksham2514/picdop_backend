@@ -1,54 +1,22 @@
 const BookingSchema = require("../model/BookingSchema");
+const Transaction = require("../model/Transaction");
 const User = require("../model/Users");
-const jwt = require("jsonwebtoken");
-const { createTransaction } = require("./Transaction");
 
-const createUser = (req, res) => {
-  User.updateOne(
+const createTransaction = (req, res) => {
+  Transaction.updateOne(
     {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      line1: req.body.line1,
-      line2: req.body.line2,
-      city: req.body.city,
-      state: req.body.state,
-      pin: req.body.pin,
-      mapsLink: req.body.mapsLink,
-      contact: req.body.contact,
-      role: req.body.role ? req.body.role : "user",
-      category: req.body.category,
-      subCategory: req.body.subCategory,
-      shopName: req.body.shopName,
-      shopNumber: req.body.shopNumber,
-      shopImages: req.body.shopImages,
-      cardNumber: req.body.cardNumber,
-      cardHolder: req.body.cardHolder,
-      cardExpiry: req.body.cardExpiry,
-      cardCVV: req.body.cardCVV,
+      receiver: req?.body?.receiver,
+      sender: req?.body?.sender,
+      amount: req?.body?.amount,
+      status: req?.body?.status,
     },
     {
       $set: {
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        line1: req.body.line1,
-        line2: req.body.line2,
-        city: req.body.city,
-        state: req.body.state,
-        pin: req.body.pin,
-        mapsLink: req.body.mapsLink,
-        contact: req.body.contact,
-        role: req.body.role ? req.body.role : "user",
-        category: req.body.category,
-        subCategory: req.body.subCategory,
-        shopName: req.body.shopName,
-        shopNumber: req.body.shopNumber,
-        shopImages: req.body.shopImages,
-        cardNumber: req.body.cardNumber,
-        cardHolder: req.body.cardHolder,
-        cardExpiry: req.body.cardExpiry,
-        cardCVV: req.body.cardCVV,
+        
+        receiver: req?.body?.receiver,
+        sender: req?.body?.sender,
+        amount: req?.body?.amount,
+        status: req?.body?.status,
       },
     },
     { upsert: true, setDefaultsOnInsert: true },
@@ -60,15 +28,8 @@ const createUser = (req, res) => {
   );
 };
 
-const getUsers = (req, res) => {
-  User.find()
-    .select([
-      "-cardCVV",
-      "-cardNumber",
-      "-cardHolder",
-      "-cardExpiry",
-      "-password",
-    ])
+const getTransactions = (req, res) => {
+  Transaction.find()
     .exec((err, users) => {
       if (err) {
         res.send(err);
@@ -77,34 +38,46 @@ const getUsers = (req, res) => {
     });
 };
 
-const findUsers = (req, res) => {
-  User.find(req.body)
-    .sort({ createdAt: -1 })
-    .select([
-      "-cardCVV",
-      "-cardNumber",
-      "-cardHolder",
-      "-cardExpiry",
-      "-password",
-    ])
-    .exec((err, users) => {
-      if (err) {
-        res.send(err);
-      }
-      // const token = jwt.sign(
-      //   { userObj: users[0].role },
-      //   process.env.SECRET_KEY,
-      //   {
-      //     expiresIn: "1d",
-      //   }
-      // );
+const findTransactions = async (req, res) => {
+ 
+  // Transaction.find().exec((err,data)=>{
+  //   res.send(data)
+  // })
 
-      res.json(users);
-    });
+  const userTotals = await Transaction.aggregate([
+    {
+      $group: {
+        _id: {
+          receiver: "$receiver", // Group by the 'status' field
+          // createdBy: "$createdBy" // Group by the 'createdBy' field
+        },
+        totalAmount: { $sum: "$amount" }, // Sum the 'totalAmount' field
+      },
+    },
+    {
+      $lookup: {
+        from: "User", // The User model collection name
+        localField: "receiver",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    // {
+    //   $project: {
+    //     _id: 0,
+    //     status: "$_id.status",
+    //     user: "$_id.createdBy",
+    //     totalAmount: 1,
+    //     parcelPaymentCollection: 1,
+    //   },
+    // },
+  ]);
+
+  res.json(userTotals)
 };
 
 const updateUser = (req, res) => {
-  User.findOneAndUpdate(
+  Transaction.findOneAndUpdate(
     { _id: req.params.userID },
     {
       $set: {
@@ -143,44 +116,6 @@ const updateUser = (req, res) => {
       if (err) {
         res.send(err);
       } else res.json(User);
-    });
-};
-
-const addToWallet = (req, res) => {
-  User.findOneAndUpdate(
-    { _id: req.body.userID },
-    {
-      $inc: { wallet: parseInt(req.body.amount) },
-    },
-    { new: true, setDefaultsOnInsert: true }
-  )
-    .select(["wallet"])
-    .exec((err, User) => {
-      if (err) {
-        res.send(err);
-      } else {
-        createTransaction(User._id, req.body.amount, "addWallet", "user");
-        res.json(User);
-      }
-    });
-};
-
-const deductWallet = (req, res) => {
-  User.findOneAndUpdate(
-    { _id: req.body.userID },
-    {
-      $inc: { wallet: -req.body.amount },
-    },
-    { new: true, setDefaultsOnInsert: true }
-  )
-    .select(["wallet"])
-    .exec((err, User) => {
-      if (err) {
-        res.send(err);
-      } else {
-        createTransaction(User._id, req.body.amount, "redeemWallet", "agent");
-        res.json(User);
-      }
     });
 };
 
@@ -226,7 +161,7 @@ const deductWallet = (req, res) => {
 // };
 
 const deleteUser = (req, res) => {
-  User.deleteOne({ _id: req.params.userID })
+  Transaction.deleteOne({ _id: req.params.userID })
     .then(() => res.json({ message: "User Deleted" }))
     .catch((err) => res.send(err));
 };
@@ -244,12 +179,10 @@ const adminEarnings = async (req, res) => {
       {
         $group: {
           _id: {
-            status: "$status", // Group by the 'status' field
+            // status: "$status", // Group by the 'status' field
             createdBy: "$createdBy", // Group by the 'createdBy' field
           },
           totalAmount: { $sum: "$parcelPaymentCollection" }, // Sum the 'totalAmount' field
-          status: { $push: "$status" },
-          createdAt: { $push: "$createdAt" },
         },
       },
       {
@@ -267,17 +200,17 @@ const adminEarnings = async (req, res) => {
           user: "$_id.createdBy",
           totalAmount: 1,
           parcelPaymentCollection: 1,
-          createdAt: "$createdAt",
         },
       },
     ]);
+    console.log(userTotals);
 
     let fil = {};
     if (req?.body?.id) {
       fil = { _id: req?.body?.id };
     }
 
-    const populatedUserTotals = await User.populate(userTotals, {
+    const populatedUserTotals = await Transaction.populate(userTotals, {
       path: "user",
       select: "name email", // Change to the actual field name in the User model,
       match: { ...fil },
@@ -360,7 +293,7 @@ const adminEarningsWorking = async (req, res) => {
     }
     console.log(userTotals);
 
-    const populatedUserTotals = await User.populate(userTotals, {
+    const populatedUserTotals = await Transaction.populate(userTotals, {
       path: "_id",
       select: "name email", // Change to the actual field name in the User model,
       match: { ...fil },
@@ -378,13 +311,11 @@ const adminEarningsWorking = async (req, res) => {
 };
 
 module.exports = {
-  getUsers,
-  findUsers,
-  createUser,
+  getTransactions,
+  findTransactions,
+  createTransaction,
   updateUser,
   deleteUser,
   adminEarnings,
   statusAnalysis,
-  addToWallet,
-  deductWallet,
 };
