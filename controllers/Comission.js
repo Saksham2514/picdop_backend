@@ -41,7 +41,6 @@ const getComission = async (booking, res) => {
       },
     })
     .then((r) => {
-      console.log(r.data.rows[0]);
       const distance = Math.round(
         r.data.rows[0].elements[0].distance.value / 1000
       );

@@ -203,7 +203,6 @@ const adminEarnings = async (req, res) => {
         },
       },
     ]);
-    console.log(userTotals);
 
     let fil = {};
     if (req?.body?.id) {
@@ -291,7 +290,6 @@ const adminEarningsWorking = async (req, res) => {
     if (req?.body?.id) {
       fil = { _id: req?.body?.id };
     }
-    console.log(userTotals);
 
     const populatedUserTotals = await Transaction.populate(userTotals, {
       path: "_id",

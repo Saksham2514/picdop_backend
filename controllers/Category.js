@@ -22,7 +22,7 @@ const createCategory = (req, res) => {
     { upsert: true, setDefaultsOnInsert: true },
     (err, User) => {
       if (err) {
-        res.send(err); 
+        res.send(err);
       } else res.json(User);
     }
   );
@@ -36,8 +36,6 @@ const calculatePrice = (req, res) => {
       if (err) {
         res.send(err);
       } else {
-        console.log(Users[0]["city"]);
-        console.log(Users[1]["city"]);
         findPrice(
           Users[0]["city"] === Users[1]["city"],
           req.body.weight,

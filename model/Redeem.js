@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const NoteSchema = new mongoose.Schema(
+const Redeem = new mongoose.Schema(
   {
     status: {
       type: String,
@@ -10,9 +10,14 @@ const NoteSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    agentID: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    bankID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BankDetails",
       required: true,
     },
   },
@@ -21,4 +26,4 @@ const NoteSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Notes", NoteSchema);
+module.exports = mongoose.model("Redeem", Redeem);

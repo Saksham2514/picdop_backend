@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const NoteSchema = new mongoose.Schema(
+const BankDetails = new mongoose.Schema(
   {
     holderName: {
       type: String,
@@ -8,15 +8,12 @@ const NoteSchema = new mongoose.Schema(
     },
     bankName: {
       type: String,
-      required: true,
     },
     ifscCode: {
       type: String,
-      required: true,
     },
     accountNumber: {
       type: String,
-      required: true,
     },
     upi: {
       type: String,
@@ -32,4 +29,4 @@ const NoteSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Notes", NoteSchema);
+module.exports = mongoose.model("BankDetails", BankDetails);

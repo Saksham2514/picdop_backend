@@ -42,7 +42,6 @@ const deleteNote = (req, res) => {
 };
 
 const getANote = (req, res) => {
-  console.log(req.params);
   Note.find({ createdBy: req.body.id })
     .sort({ createdAt: -1 })
     .exec((err, Note) => {

@@ -358,7 +358,6 @@ const adminEarningsWorking = async (req, res) => {
     if (req?.body?.id) {
       fil = { _id: req?.body?.id };
     }
-    console.log(userTotals);
 
     const populatedUserTotals = await User.populate(userTotals, {
       path: "_id",

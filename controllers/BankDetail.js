@@ -7,21 +7,29 @@ const updateDetails = (req, res) => {
     ifscCode: req.body.ifscCode,
     accountNumber: req.body.accountNumber,
     userID: req.body.userID,
+    upi: req.body.upi,
   };
 
-  if (req.body.upi) fields.upi = req.body.upi;
-  
-  BankDetail.findOneAndUpdate(
+  return BankDetail.findOneAndUpdate(
     { userID: req.body.userID },
     {
       $set: fields,
     },
     { upsert: true }
-  )
-    .then((detail) => {
-      console.log(detail);
+  );
+};
+
+const getBankDetails = (req, res) => {
+  BankDetail.findOne({ userID: req.body.userID })
+    .then((bankDetails) => {
+      res.send(bankDetails);
     })
     .catch((err) => {
-      console.log(err);
+      res.send(err);
     });
+};
+
+module.exports = {
+  updateDetails,
+  getBankDetails,
 };

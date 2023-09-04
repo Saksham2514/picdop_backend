@@ -5,7 +5,6 @@ const { getComission } = require("./Comission");
 const { createTransaction } = require("./Transaction");
 
 const createOrder = (req, res) => {
-  console.log(req.body.role);
   req.body.role == "admin"
     ? createBooking(req, res, 0)
     : User.findOneAndUpdate(
@@ -17,7 +16,6 @@ const createOrder = (req, res) => {
       )
         .then((usr) => {
           createBooking(req, res, usr.wallet);
-          console.log(usr.wallet);
         })
         .catch((err) => {
           res.send(err);
@@ -73,7 +71,6 @@ const getOrder = (req, res) => {
     });
 };
 const getAnOrder = (req, res) => {
-  console.log(req.params);
   Booking.find({ _id: req.params.orderId })
     .sort({ createdAt: -1 })
     .exec((err, BookingSchema) => {

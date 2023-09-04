@@ -71,6 +71,13 @@ const {
   getCommissionValues,
 } = require("./controllers/Comission");
 
+const {
+  findRedeemReq,
+  createRedeemReq,
+  updateRedeemReq,
+} = require("./controllers/Redeem");
+const { updateDetails, getBankDetails } = require("./controllers/BankDetail");
+
 router.get("/", (req, res) => {
   res.send("Working");
 });
@@ -133,6 +140,16 @@ router.post("/deductWallet", deductWallet);
 router.put("/updateComission", updateComission);
 router.post("/getComission", getComission);
 router.get("/getComissionValues", getCommissionValues);
+
+// Redeem
+router.post("/findRedeemReq", findRedeemReq);
+router.post("/createredeemreq", createRedeemReq);
+router.put("/updateredeemreq", updateRedeemReq);
+
+// Bank Details
+router.post("/updateBankDetails", updateDetails);
+router.post("/getBankDetails", getBankDetails);
+
 // router.post(
 //   "/test",
 //   upload.fields([
