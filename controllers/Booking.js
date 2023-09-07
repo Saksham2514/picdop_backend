@@ -145,6 +145,12 @@ const getOrderByUser = (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
+  if (req.body.status == "Accepted") {
+    let otp = parseInt(
+      (Math.floor(Math.random() * 999999) + 100000).toString().substring(0, 6)
+    );
+    console.log(otp);
+  }
   const booking = await Booking.findOneAndUpdate(
     { _id: req.params.orderID },
     {

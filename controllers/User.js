@@ -77,7 +77,8 @@ const getUsers = (req, res) => {
     });
 };
 
-const findUsers = (req, res) => {
+const findUsers = async (req, res) => {
+  generateToken = req.body.generate;
   User.find(req.body)
     .sort({ createdAt: -1 })
     .select([
@@ -91,15 +92,18 @@ const findUsers = (req, res) => {
       if (err) {
         res.send(err);
       }
-      // const token = jwt.sign(
-      //   { userObj: users[0].role },
-      //   process.env.SECRET_KEY,
-      //   {
-      //     expiresIn: "1d",
-      //   }
-      // );
-
-      res.json(users);
+      if (generateToken) {
+        const token = jwt.sign(
+          { role: users[0].role, userID: users[0]._id },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: "1d",
+          }
+        );
+        res.json([...users, token]);
+      } else {
+        res.json(users);
+      }
     });
 };
 

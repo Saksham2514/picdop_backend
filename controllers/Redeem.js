@@ -35,8 +35,8 @@ const createRedeemReq = (req, res) => {
 };
 
 const findRedeemReq = async (req, res) => {
-  const redeemData = await Redeem.find(req.body);
-  if (!req.body?.userID) {
+  if (!req.body?.uid) {
+    const redeemData = await Redeem.find({});
     try {
       const result = await BankDetails.populate(redeemData, {
         path: "bankID",
@@ -47,6 +47,7 @@ const findRedeemReq = async (req, res) => {
       res.send(err);
     }
   } else {
+    const redeemData = await Redeem.find({ userID: req.body.uid });
     res.send(redeemData);
   }
 };

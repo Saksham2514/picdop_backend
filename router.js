@@ -26,7 +26,7 @@ const {
   agentEarnings,
   statusAnalysis,
   addToWallet,
-  deductWallet,
+  // deductWallet,
 } = require("./controllers/User");
 
 const {
@@ -67,7 +67,7 @@ const { getSummary } = require("./controllers/Transaction");
 
 const {
   updateComission,
-  getComission,
+  // getComission,
   getCommissionValues,
 } = require("./controllers/Comission");
 
@@ -83,73 +83,80 @@ router.get("/", (req, res) => {
 });
 
 // User Routes
-router.get("/users", getUsers);
-
+router.get("/users", auth(["agent", "user", "admin"]), getUsers);
 router.post("/users/search", findUsers);
-
 router.post("/users", createUser);
-
-router.put("/users/:userID", updateUser);
-
-router.delete("/users/:userID", deleteUser);
+router.put("/users/:userID", auth(["admin", "agent", "user"]), updateUser);
+router.delete("/users/:userID", auth(["admin"]), deleteUser);
 // USer Routes end
 
-// Booking Routs
-router.get("/orders", getOrder);
-
-router.get("/order/:userID", getOrderByUser);
-
-router.post("/orders/search", findOrder);
-router.post("/orders/searchLimit", findOrderLimit);
-
-router.post("/orders", createOrder);
-router.post("/income", getTotalIncome);
-
-router.put("/orders/:orderID", updateOrder);
-
-router.delete("/orders/:orderID", deleteOrder);
+// Booking Routes
+router.get("/orders", auth(["admin", "agent", "user"]), getOrder);
+router.get("/order/:userID", auth(["admin", "agent", "user"]), getOrderByUser);
+router.post("/orders/search", auth(["admin", "agent", "user"]), findOrder);
+router.post(
+  "/orders/searchLimit",
+  auth(["admin", "agent", "user"]),
+  findOrderLimit
+);
+router.post("/orders", auth(["admin", "agent", "user"]), createOrder);
+router.post("/income", auth(["admin", "agent", "user"]), getTotalIncome);
+router.put("/orders/:orderID", auth(["admin", "agent", "user"]), updateOrder);
+router.delete(
+  "/orders/:orderID",
+  auth(["admin", "agent", "user"]),
+  deleteOrder
+);
 
 //Categories
-router.get("/prices", getCategories);
-
-router.post("/prices/search", searchCategories);
-
-router.post("/prices", createCategory);
-router.post("/calculate/prices", calculatePrice);
-
-router.put("/prices/:userID", updateCategories);
-
-router.delete("/prices/:userID", deleteCategories);
+router.get("/prices", auth(["admin", "agent", "user"]), getCategories);
+router.post(
+  "/prices/search",
+  auth(["admin", "agent", "user"]),
+  searchCategories
+);
+router.post("/prices", auth(["admin", "agent", "user"]), createCategory);
+router.post(
+  "/calculate/prices",
+  auth(["admin", "agent", "user"]),
+  calculatePrice
+);
+router.put(
+  "/prices/:userID",
+  auth(["admin", "agent", "user"]),
+  updateCategories
+);
+router.delete(
+  "/prices/:userID",
+  auth(["admin", "agent", "user"]),
+  deleteCategories
+);
 
 // Note
-router.post("/getNotes", getNotes);
-
-router.post("/getNote", getANote);
-
-router.post("/createNote", createNote);
-
-router.delete("/deleteNote/:noteId", deleteNote);
-//Image Upload
+router.post("/getNotes", auth(["admin"]), getNotes);
+router.post("/getNote", auth(["user"]), getANote);
+router.post("/createNote", auth(["user"]), createNote);
+router.delete("/deleteNote/:noteId", auth(["user"]), deleteNote);
 
 // Wallet
-router.post("/addToWallet", addToWallet);
-
-router.post("/deductWallet", deductWallet);
+router.post("/addToWallet", auth(["user"]), addToWallet);
+// router.post("/deductWallet", deductWallet);
 
 // Commision
-router.put("/updateComission", updateComission);
-router.post("/getComission", getComission);
-router.get("/getComissionValues", getCommissionValues);
+router.put("/updateComission", auth(["admin"]), updateComission);
+router.get("/getComissionValues", auth(["admin"]), getCommissionValues);
+// router.post("/getComission", auth(["agent"]), getComission);
 
 // Redeem
-router.post("/findRedeemReq", findRedeemReq);
-router.post("/createredeemreq", createRedeemReq);
-router.put("/updateredeemreq", updateRedeemReq);
+router.post("/findRedeemReq", auth(["agent", "admin"]), findRedeemReq);
+router.post("/createredeemreq", auth(["agent"]), createRedeemReq);
+router.put("/updateredeemreq", auth(["admin"]), updateRedeemReq);
 
 // Bank Details
-router.post("/updateBankDetails", updateDetails);
-router.post("/getBankDetails", getBankDetails);
+router.post("/updateBankDetails", auth(["agent"]), updateDetails);
+router.post("/getBankDetails", auth(["agent", "admin"]), getBankDetails);
 
+// Image upload
 // router.post(
 //   "/test",
 //   upload.fields([
@@ -177,6 +184,6 @@ router.post("/admin/earnings/status", statusAnalysis);
 // router.post("/admin/transaction/all", getTransactions);
 // router.post("/admin/transaction/one", findTransactions);
 
-router.post("/getSummary", getSummary);
+router.post("/getSummary", auth(["admin", "user", "agent"]), getSummary);
 
 module.exports = router;

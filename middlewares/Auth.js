@@ -3,19 +3,19 @@ const jwt = require("jsonwebtoken");
 function auth(role) {
   return function (req, res, next) {
     const token = req.header("Authorization");
+
     if (!token) {
-      console.log("No token found");
       return res.status(403).send("Access denied. No token provided.");
     }
     try {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
-      if (decoded.userObj !== role) {
+      if (!role.includes(decoded.role)) {
         return res.status(403).send("Forbidden.");
       }
-      req.user = decoded;
+      req.body.userID = decoded.userID;
+      req.body.role = decoded.role;
       next();
-    } catch (ex) {
-      console.log(ex);
+    } catch {
       res.status(503).json({ message: "Session expired" });
     }
   };
