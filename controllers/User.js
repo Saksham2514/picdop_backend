@@ -82,12 +82,22 @@ const findUsers = async (req, res) => {
   User.find(req.body)
     .sort({ createdAt: -1 })
     .select([
-      "-cardCVV",
-      "-cardNumber",
-      "-cardHolder",
-      "-cardExpiry",
-      "-password",
+      "name",
+      "email",
+      "contact",
+      "shopNumber",
+      "shopName",
+      "role",
+      "createdAt",
     ])
+    // .select([
+    //   "-cardCVV",
+    //   "-cardNumber",
+    //   "-cardHolder",
+    //   "-cardExpiry",
+    //   "-password",
+    //   "-shopImage"
+    // ])
     .exec((err, users) => {
       if (err) {
         res.send(err);
